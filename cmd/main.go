@@ -1,10 +1,14 @@
 package main
 
 import (
+	"crud-go/internal/repository/psql"
+	"crud-go/internal/service"
+	"crud-go/internal/transport/rest"
 	"crud-go/pkg/database"
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 )
 
 func checkCurRelations(db *sql.DB) {
@@ -51,21 +55,26 @@ func main() {
 		SSLMode:  "disable",
 		Password: "postgres",
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer db.Close()
 
 	checkCurRelations(db)
 	checkCurDB(db)
 
-	//TODO: Инициализировать зависимости (репозиторий -> сервис -> хендлер)
-	//http.HandleFunc("/phones", handleFunc)
-	//http.HandleFunc("/phonesGet", handleFuncGet)
+	phonesRepository := psql.NewPhone(db)
+	phonesService := service.NewPhones(phonesRepository)
+	phonesController := rest.NewPhonesHandler(phonesService)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: phonesController.InitRouter(),
+	}
+
+	log.Println("SERVER STARTED AT", time.Now().Format(time.RFC3339))
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

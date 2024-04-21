@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -92,9 +93,9 @@ func (p *Phones) getAllPhones(w http.ResponseWriter, r *http.Request) {
 
 func (p *Phones) createPhone(w http.ResponseWriter, r *http.Request) {
 	var phone entity.PhoneInputDto
-	var reqBytes []byte
 
-	_, err := r.Body.Read(reqBytes)
+	reqBytes, err := io.ReadAll(r.Body)
+
 	if err != nil {
 		log.Println("CreatePhone() error: ", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -127,9 +128,8 @@ func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var phone entity.PhoneInputDto
-	var reqBytes []byte
 
-	_, err = r.Body.Read(reqBytes)
+	reqBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println("UpdatePhoneById() error: ", err)
 		w.WriteHeader(http.StatusBadRequest)
