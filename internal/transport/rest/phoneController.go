@@ -32,7 +32,7 @@ func NewPhonesHandler(phonesService PhonesService) *Phones {
 
 func (p *Phones) InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.Use()
+	r.Use(loggingMiddleware)
 
 	phones := r.PathPrefix("/api/phones").Subrouter()
 	{
