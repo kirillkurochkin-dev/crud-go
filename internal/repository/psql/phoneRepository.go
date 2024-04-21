@@ -10,7 +10,7 @@ type Phones struct {
 	db *sql.DB
 }
 
-func NewBooks(db *sql.DB) *Phones {
+func NewPhone(db *sql.DB) *Phones {
 	return &Phones{db: db}
 }
 
@@ -52,12 +52,12 @@ func (p *Phones) CreatePhone(ctx context.Context, ph entity.PhoneInputDto) error
 }
 
 func (p *Phones) UpdatePhoneById(ctx context.Context, id int, ph entity.PhoneInputDto) error {
-	_, err := p.db.Exec("UPDATE books SET brand=$1, model=$2, year=$3, os=$4, processor=$5 WHERE id=$6",
+	_, err := p.db.Exec("UPDATE phones SET brand=$1, model=$2, year=$3, os=$4, processor=$5 WHERE id=$6",
 		ph.Brand, ph.Model, ph.Year, ph.OS, ph.Processor, id)
 	return err
 }
 
 func (p *Phones) DeletePhoneById(ctx context.Context, id int) error {
-	_, err := p.db.Exec("DELETE FROM books WHERE id = $1", id)
+	_, err := p.db.Exec("DELETE FROM phones WHERE id = $1", id)
 	return err
 }

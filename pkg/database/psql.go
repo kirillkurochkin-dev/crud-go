@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"log"
 )
 
 type ConnectionInfo struct {
@@ -25,6 +26,8 @@ func NewPostgresConnection(info ConnectionInfo) (*sql.DB, error) {
 
 	if err := db.Ping(); err != nil {
 		return nil, err
+	} else {
+		log.Print("Database is up")
 	}
 
 	return db, nil

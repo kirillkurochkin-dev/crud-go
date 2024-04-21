@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    container_name: http-server-edu-db
+    container_name: crud-go-db
     image: postgres:latest
     restart: always
     environment:
