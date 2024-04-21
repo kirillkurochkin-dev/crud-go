@@ -6,11 +6,11 @@ import (
 )
 
 type PhonesRepository interface {
-	GetPhoneById(ctx context.Context, id int) (entity.Phone, error)
+	GetPhoneById(ctx context.Context, id int64) (entity.Phone, error)
 	GetAllPhones(ctx context.Context) ([]entity.Phone, error)
 	CreatePhone(ctx context.Context, ph entity.PhoneInputDto) error
-	UpdatePhoneById(ctx context.Context, id int, ph entity.PhoneInputDto) error
-	DeletePhoneById(ctx context.Context, id int) error
+	UpdatePhoneById(ctx context.Context, id int64, ph entity.PhoneInputDto) error
+	DeletePhoneById(ctx context.Context, id int64) error
 }
 
 type Phones struct {
@@ -23,7 +23,7 @@ func NewPhones(repository PhonesRepository) *Phones {
 	}
 }
 
-func (p *Phones) GetPhoneById(ctx context.Context, id int) (entity.Phone, error) {
+func (p *Phones) GetPhoneById(ctx context.Context, id int64) (entity.Phone, error) {
 	return p.repository.GetPhoneById(ctx, id)
 }
 
@@ -35,10 +35,10 @@ func (p *Phones) CreatePhone(ctx context.Context, ph entity.PhoneInputDto) error
 	return p.repository.CreatePhone(ctx, ph)
 }
 
-func (p *Phones) UpdatePhoneById(ctx context.Context, id int, ph entity.PhoneInputDto) error {
+func (p *Phones) UpdatePhoneById(ctx context.Context, id int64, ph entity.PhoneInputDto) error {
 	return p.repository.UpdatePhoneById(ctx, id, ph)
 }
 
-func (p *Phones) DeletePhoneById(ctx context.Context, id int) error {
+func (p *Phones) DeletePhoneById(ctx context.Context, id int64) error {
 	return p.repository.DeletePhoneById(ctx, id)
 }

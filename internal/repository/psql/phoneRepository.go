@@ -14,7 +14,7 @@ func NewPhone(db *sql.DB) *Phones {
 	return &Phones{db: db}
 }
 
-func (p *Phones) GetPhoneById(ctx context.Context, id int) (entity.Phone, error) {
+func (p *Phones) GetPhoneById(ctx context.Context, id int64) (entity.Phone, error) {
 	var ph entity.Phone
 	err := p.db.QueryRow("SELECT * FROM phones WHERE id = $1", id).
 		Scan(&ph.Id, &ph.Brand, &ph.Model, &ph.Year, &ph.OS, &ph.Processor)
@@ -51,13 +51,13 @@ func (p *Phones) CreatePhone(ctx context.Context, ph entity.PhoneInputDto) error
 	return err
 }
 
-func (p *Phones) UpdatePhoneById(ctx context.Context, id int, ph entity.PhoneInputDto) error {
+func (p *Phones) UpdatePhoneById(ctx context.Context, id int64, ph entity.PhoneInputDto) error {
 	_, err := p.db.Exec("UPDATE phones SET brand=$1, model=$2, year=$3, os=$4, processor=$5 WHERE id=$6",
 		ph.Brand, ph.Model, ph.Year, ph.OS, ph.Processor, id)
 	return err
 }
 
-func (p *Phones) DeletePhoneById(ctx context.Context, id int) error {
+func (p *Phones) DeletePhoneById(ctx context.Context, id int64) error {
 	_, err := p.db.Exec("DELETE FROM phones WHERE id = $1", id)
 	return err
 }
