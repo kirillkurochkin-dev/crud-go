@@ -5,11 +5,16 @@ import (
 	"crud-go/internal/entity"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
+
+	_ "crud-go/docs"
+
+	"github.com/gorilla/mux"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type PhonesService interface {
@@ -33,7 +38,6 @@ func NewPhonesHandler(phonesService PhonesService) *Phones {
 func (p *Phones) InitRouter() *mux.Router {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
-
 	phones := r.PathPrefix("/api/phones").Subrouter()
 	{
 		phones.HandleFunc("", p.createPhone).Methods(http.MethodPost)
@@ -43,9 +47,23 @@ func (p *Phones) InitRouter() *mux.Router {
 		phones.HandleFunc("/{id:[0-9]+", p.updatePhoneById).Methods(http.MethodPut)
 	}
 
+	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
+
+	))
+
 	return r
 }
 
+// @Summary Get a phone by ID
+// @Description Retrieve a phone record by its ID
+// @Tags Phones
+// @Accept json
+// @Produce json
+// @Param id path int true "Phone ID"
+// @Success 200 {object} entity.Phone "OK"
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/phones/{id} [get]
 func (p *Phones) getPhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {
@@ -72,6 +90,14 @@ func (p *Phones) getPhoneById(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Get all phones
+// @Description Retrieve all phone records
+// @Tags Phones
+// @Accept json
+// @Produce json
+// @Success 200 {array} entity.Phone "OK"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /api/phones [get]
 func (p *Phones) getAllPhones(w http.ResponseWriter, r *http.Request) {
 	phones, err := p.phonesService.GetAllPhones(context.TODO())
 	if err != nil {
@@ -91,6 +117,16 @@ func (p *Phones) getAllPhones(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Create a new phone
+// @Description Create a new phone record
+// @Tags Phones
+// @Accept json
+// @Produce json
+// @Param phone body entity.PhoneInputDto true "Phone Data"
+// @Success 201 {string} string "Created"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /api/phones [post]
 func (p *Phones) createPhone(w http.ResponseWriter, r *http.Request) {
 	var phone entity.PhoneInputDto
 
@@ -119,6 +155,19 @@ func (p *Phones) createPhone(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// @Summary Update a phone by ID
+// @Description Update an existing phone record
+// @Tags Phones
+// @Accept json
+// @Produce json
+// @Param id path int true "Phone ID"
+// @Param phone body entity.PhoneInputDto true "Phone Data"
+// @Success 200 {string} string "OK"
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/phones/{id} [put]neInputDto true "Phone Data"
+// @Success 200 {string} string "OK"
+// @Failure 400 {string} string "Bad Request"
+// @Router /api/phones/{id} [put]
 func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {
@@ -147,6 +196,16 @@ func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// @Summary Delete a phone by ID
+// @Description Delete a phone record by its ID
+// @Tags Phones
+// @Accept json
+// @Produce json
+// @Param id path int true "Phone ID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /api/phones/{id} [delete]
 func (p *Phones) deletePhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {

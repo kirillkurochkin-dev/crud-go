@@ -46,6 +46,12 @@ func checkCurDB(db *sql.DB) {
 	log.Println("Current database:", dbName)
 }
 
+// @title Phone API
+// @description This is a RESTful API for managing phone records.
+// @version 1.0
+// @host localhost:8080
+// @BasePath /api/phones
+
 func main() {
 	db, err := database.NewPostgresConnection(database.ConnectionInfo{
 		Host:     "localhost",
