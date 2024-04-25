@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crud-go/internal/config"
 	"crud-go/internal/repository/psql"
 	"crud-go/internal/service"
 	"crud-go/internal/transport/rest"
@@ -53,13 +54,19 @@ func checkCurDB(db *sql.DB) {
 // @BasePath /api/phones
 
 func main() {
+
+	dbConfig, err := config.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db, err := database.NewPostgresConnection(database.ConnectionInfo{
-		Host:     "localhost",
-		Port:     5432,
-		Username: "postgres",
-		DBName:   "crud-go",
-		SSLMode:  "disable",
-		Password: "postgres",
+		Host:     dbConfig.DB.Host,
+		Port:     dbConfig.DB.Port,
+		Username: dbConfig.DB.Username,
+		DBName:   dbConfig.DB.Name,
+		SSLMode:  dbConfig.DB.SSLMode,
+		Password: dbConfig.DB.Password,
 	})
 	if err != nil {
 		log.Fatal(err)
