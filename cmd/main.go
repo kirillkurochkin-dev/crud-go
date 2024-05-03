@@ -7,31 +7,37 @@ import (
 	"crud-go/internal/transport/rest"
 	"crud-go/pkg/database"
 	"database/sql"
-	"log"
 	"net/http"
-	"time"
+	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 func checkCurRelations(db *sql.DB) {
 	// Query to retrieve all tables in the current database
 	rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'")
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	defer rows.Close()
 
-	// Iterate over the rows and print the table names
-	log.Println("Tables in the current database:")
+	var tables []string
+
 	for rows.Next() {
-		var tableName string
-		err := rows.Scan(&tableName)
+		var table string
+		err := rows.Scan(&table)
 		if err != nil {
-			log.Fatal(err)
+			logrus.Fatal(err)
 		}
-		log.Println(tableName)
+		tables = append(tables, table)
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"tables": tables,
+	}).Info("Tables in the current database")
+
 	if err = rows.Err(); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
@@ -40,11 +46,13 @@ func checkCurDB(db *sql.DB) {
 	var dbName string
 	err := db.QueryRow("SELECT current_database()").Scan(&dbName)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 	// Print the name of the current database
-	log.Println("Current database:", dbName)
+	logrus.WithFields(logrus.Fields{
+		"tables": dbName,
+	}).Info("Current database")
 }
 
 // @title Phone API
@@ -53,11 +61,17 @@ func checkCurDB(db *sql.DB) {
 // @host localhost:8080
 // @BasePath /api/phones
 
+func init() {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.InfoLevel)
+}
+
 func main() {
 
 	dbConfig, err := config.New()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 	db, err := database.NewPostgresConnection(database.ConnectionInfo{
@@ -68,8 +82,9 @@ func main() {
 		SSLMode:  dbConfig.DB.SSLMode,
 		Password: dbConfig.DB.Password,
 	})
+
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	defer db.Close()
 
@@ -85,9 +100,9 @@ func main() {
 		Handler: phonesController.InitRouter(),
 	}
 
-	log.Println("SERVER STARTED AT", time.Now().Format(time.RFC3339))
+	logrus.Info("SERVER STARTED")
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }

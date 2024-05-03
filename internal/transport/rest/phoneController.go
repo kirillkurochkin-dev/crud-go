@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
 	_ "crud-go/docs"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -67,21 +67,30 @@ func (p *Phones) InitRouter() *mux.Router {
 func (p *Phones) getPhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {
-		log.Println("GetPhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "getPhoneById",
+			"problem": "getting id from request",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	book, err := p.phonesService.GetPhoneById(context.TODO(), id)
 	if err != nil {
-		log.Println("GetPhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "getPhoneById",
+			"problem": "service error",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	response, err := json.Marshal(book)
 	if err != nil {
-		log.Println("GetPhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "getPhoneById",
+			"problem": "marshal error",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -101,14 +110,20 @@ func (p *Phones) getPhoneById(w http.ResponseWriter, r *http.Request) {
 func (p *Phones) getAllPhones(w http.ResponseWriter, r *http.Request) {
 	phones, err := p.phonesService.GetAllPhones(context.TODO())
 	if err != nil {
-		log.Println("GetAllPhones() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "getAllPhones",
+			"problem": "service error",
+		}).Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	response, err := json.Marshal(phones)
 	if err != nil {
-		log.Println("GetAllPhones() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "getAllPhones",
+			"problem": "marshal error",
+		}).Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -133,21 +148,30 @@ func (p *Phones) createPhone(w http.ResponseWriter, r *http.Request) {
 	reqBytes, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		log.Println("CreatePhone() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "createPhone",
+			"problem": "getting id from request",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = json.Unmarshal(reqBytes, &phone)
 	if err != nil {
-		log.Println("CreatePhone() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "createPhone",
+			"problem": "unmarshal error",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = p.phonesService.CreatePhone(context.TODO(), phone)
 	if err != nil {
-		log.Println("CreatePhone() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "createPhone",
+			"problem": "service error",
+		}).Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -171,7 +195,10 @@ func (p *Phones) createPhone(w http.ResponseWriter, r *http.Request) {
 func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {
-		log.Println("UpdatePhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "updatePhoneById",
+			"problem": "getting id from request",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -180,14 +207,20 @@ func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 
 	reqBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println("UpdatePhoneById() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "updatePhoneById",
+			"problem": "reading body",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = json.Unmarshal(reqBytes, &phone)
 	if err != nil {
-		log.Println("CreatePhone() error: ", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "updatePhoneById",
+			"problem": "unmarshal error",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -209,14 +242,20 @@ func (p *Phones) updatePhoneById(w http.ResponseWriter, r *http.Request) {
 func (p *Phones) deletePhoneById(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromReq(r)
 	if err != nil {
-		log.Println("DeletePhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "deletePhoneById",
+			"problem": "getting id from request",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = p.phonesService.DeletePhoneById(context.TODO(), id)
 	if err != nil {
-		log.Println("DeletePhoneById() error:", err)
+		logrus.WithFields(logrus.Fields{
+			"handler": "deletePhoneById",
+			"problem": "service error",
+		}).Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
