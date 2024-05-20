@@ -6,9 +6,11 @@ import (
 	"crud-go/internal/service"
 	"crud-go/internal/transport/rest"
 	"crud-go/pkg/database"
+	"crud-go/pkg/hash"
 	"database/sql"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -91,13 +93,17 @@ func main() {
 	checkCurRelations(db)
 	checkCurDB(db)
 
+	var b []byte
+
 	phonesRepository := psql.NewPhone(db)
+	usersRepository := psql.NewUser(db)
 	phonesService := service.NewPhones(phonesRepository)
-	phonesController := rest.NewPhonesHandler(phonesService)
+	usersService := service.NewUser(usersRepository, hash.NewSHA1Hasher("salt"), b, 2*time.Minute)
+	controller := rest.NewController(phonesService, usersService)
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: phonesController.InitRouter(),
+		Handler: controller.InitRouter(),
 	}
 
 	logrus.Info("SERVER STARTED")
